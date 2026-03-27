@@ -1,7 +1,7 @@
 // Auto Generated - DO NOT EDIT
 using System.IO;
 
-namespace ST.Table
+namespace ST.Core.Table
 {
     /// <summary>
     /// 表格文件加载工具，提供文件字节和文本的读取接口。

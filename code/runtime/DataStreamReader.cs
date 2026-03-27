@@ -2,7 +2,7 @@
 using System.Text;
 using UnityEngine;
 
-namespace ST.Table
+namespace ST.Core.Table
 {
     /// <summary>
     /// 二进制字节流读取器，支持 varint / zigzag 编码及所有配表字段类型。

@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 
-namespace ST.Table
+namespace ST.Core.Table
 {
     /// <summary>
     /// STBL 二进制表文件解析器。

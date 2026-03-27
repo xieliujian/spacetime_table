@@ -93,6 +93,8 @@ python main.py -i <xlsx目录> -o <输出目录> -f txt -t client -v
 | `StblReader.cs` | `StblReader` | STBL 文件头解析，属性：`rowCount`（int）、`reader`（DataStreamReader） |
 | `TableLoader.cs` | `TableLoader` | 静态文件 IO：`LoadBytes(path)`、`LoadText(path)` |
 
+运行时库命名空间：`ST.Core.Table`（表格代码 `ST.Table` 通过 `using ST.Core.Table;` 引用）
+
 生成命令：
 ```bash
 python main.py -f code --csharp-out <C#目录> --runtime-out <运行时目录>
