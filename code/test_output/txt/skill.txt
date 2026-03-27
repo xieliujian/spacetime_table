@@ -1,0 +1,8 @@
+﻿技能ID	技能名称	伤害值	冷却时间	是否AOE	描述
+int	string	float	float	bool	string
+Id	Name	Damage	Cooldown	IsAoe	Desc
+1001	fireball	120.5	3	1	火球术
+1002	ice_arrow	80	2.5	0	冰箭术
+1003	thunder	200	5	1	雷击
+1004	heal	0	4	0	治疗术
+1005	slash	150	1.5	0	斩击

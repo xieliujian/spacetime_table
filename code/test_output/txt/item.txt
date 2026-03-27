@@ -1,0 +1,6 @@
+﻿物品ID	物品名称	售价	可堆叠
+int	string	int	bool
+Id	Name	Price	Stackable
+2001	sword	500	0
+2002	potion	50	1
+2003	shield	300	0

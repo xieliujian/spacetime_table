@@ -1,0 +1,30 @@
+// Auto Generated - DO NOT EDIT
+// Source: ${FILE_NAME}.xlsx
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace ST.Table
+{
+    /// <summary>
+    /// ${CLASS_NAME} 表数据行（自动生成）
+    /// </summary>
+    public partial class TD_${CLASS_NAME}
+    {
+${FIELDS_DECLARE}
+
+${PROPERTIES_DECLARE}
+
+        /// <summary> 从二进制流读取 </summary>
+        public void ParseFromBin(DataStreamReader reader)
+        {
+${PARSE_BIN_BODY}
+        }
+
+        /// <summary> 从文本行读取 </summary>
+        public void ParseFromTxt(string[] fields)
+        {
+${PARSE_TXT_BODY}
+        }
+    }
+}
