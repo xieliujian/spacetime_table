@@ -79,8 +79,26 @@ python main.py -i <xlsx目录> -o <输出目录> -f txt -t client -v
 - 类名前缀：`TD_` + PascalCase（`TD_Skill`, `TD_SkillTable`）
 - 私有字段：省略 `private`，`m_` 前缀（`m_Id`, `m_Name`）
 - 公开属性：camelCase（`public int id => m_Id;`）
+  - 适用于所有 C# 类，包括运行时库（如 `StblReader.rowCount`、`StblReader.reader`）
 - 私有方法：省略 `private`
-- 所有类使用 `partial class`
+- 所有自动生成的表格类使用 `partial class`
+
+## Runtime Library (templates/csharp/runtime/)
+
+运行时支持库文件，首次生成后不覆盖（保护手动修改）：
+
+| 文件 | 类 | 说明 |
+|------|-----|------|
+| `DataStreamReader.cs` | `DataStreamReader` | 二进制字节流读取，varint/zigzag，支持 Vector2/Vector3 |
+| `StblReader.cs` | `StblReader` | STBL 文件头解析，属性：`rowCount`（int）、`reader`（DataStreamReader） |
+| `TableLoader.cs` | `TableLoader` | 静态文件 IO：`LoadBytes(path)`、`LoadText(path)` |
+
+生成命令：
+```bash
+python main.py -f code --csharp-out <C#目录> --runtime-out <运行时目录>
+# 或仅生成运行时库（无需 -i）
+python main.py -f code --runtime-out <运行时目录>
+```
 
 ## Configuration (config.json)
 

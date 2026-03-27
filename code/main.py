@@ -37,7 +37,7 @@ from table_parser.types import ExportTarget
 from writer.bin_writer import BinWriter
 from writer.txt_writer import TxtWriter
 from writer.lua_writer import LuaWriter
-from codegen.csharp_gen import CSharpGenerator
+from codegen.csharp_gen import CSharpGenerator, generate_runtime
 from codegen.golang_gen import GolangGenerator
 
 logger = logging.getLogger("tableconv")
@@ -145,7 +145,7 @@ def _build_parser() -> argparse.ArgumentParser:
         description="配表转换工具 — 将 xlsx 配表转换为 bin/txt/lua 数据或 C#/Go 代码",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    p.add_argument("-i", "--input", required=True, help="输入目录或单个 xlsx 文件")
+    p.add_argument("-i", "--input", default="", help="输入目录或单个 xlsx 文件")
     p.add_argument("-o", "--output", default="", help="数据输出目录（bin/txt/lua 模式必填）")
     p.add_argument("-f", "--format", required=True, choices=["bin", "txt", "lua", "code"],
                    help="输出格式")
@@ -154,6 +154,8 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("-c", "--config", default="config.json", help="配置 JSON 路径")
     p.add_argument("--csharp-out", default="", help="C# 代码输出目录（code 模式）")
     p.add_argument("--go-out", default="", help="Go 代码输出目录（code 模式）")
+    p.add_argument("--runtime-out", default="",
+                   help="C# 运行时库输出目录（首次生成 DataStreamReader / StblReader / TableLoader）")
     p.add_argument("--tmpl", default="", help="模板目录（默认脚本同级 templates/）")
     p.add_argument("-v", "--verbose", action="store_true", help="输出详细日志")
     return p
@@ -161,13 +163,25 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def _validate_args(args) -> bool:
     """校验命令行参数组合的合法性。"""
+    # 数据导出模式必须提供输出目录
     if args.format in ("bin", "txt", "lua") and not args.output:
         logger.error("数据导出模式（-f %s）需要指定输出目录（-o）", args.format)
         return False
 
-    if args.format == "code" and not args.csharp_out and not args.go_out:
-        logger.error("代码生成模式（-f code）至少需要指定 --csharp-out 或 --go-out 之一")
+    # 数据导出模式必须提供输入目录
+    if args.format in ("bin", "txt", "lua") and not args.input:
+        logger.error("数据导出模式（-f %s）需要指定输入目录（-i）", args.format)
         return False
+
+    # code 模式校验
+    if args.format == "code":
+        has_code_out = bool(args.csharp_out or args.go_out)
+        if not args.runtime_out and not has_code_out:
+            logger.error("代码生成模式（-f code）至少需要指定 --csharp-out、--go-out 或 --runtime-out 之一")
+            return False
+        if has_code_out and not args.input:
+            logger.error("生成表格代码需要指定输入目录（-i）")
+            return False
 
     return True
 
@@ -196,6 +210,18 @@ def main() -> int:
     tmpl_dir = args.tmpl or os.path.join(_SCRIPT_DIR, "templates")
     if args.format == "code" and not os.path.isdir(tmpl_dir):
         logger.error("模板目录不存在: %s", tmpl_dir)
+        return 1
+
+    # 运行时库生成（不依赖 xlsx 文件，提前执行）
+    if args.format == "code" and args.runtime_out:
+        generate_runtime(args.runtime_out, tmpl_dir)
+
+    # runtime-only 模式（仅生成运行时库，无需 xlsx 输入）
+    if args.format == "code" and not args.csharp_out and not args.go_out:
+        return 0
+
+    if not args.input:
+        logger.error("需要 -i 参数指定输入目录")
         return 1
 
     xlsx_files = _collect_xlsx_files(args.input)

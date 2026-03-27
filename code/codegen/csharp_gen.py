@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from string import Template
 
@@ -173,3 +174,30 @@ class CSharpGenerator(ICodeGenerator):
         """以 UTF-8 编码写出文件。"""
         with open(path, "w", encoding="utf-8", newline="\n") as f:
             f.write(content)
+
+
+def generate_runtime(runtime_out: str, template_dir: str) -> None:
+    """将运行时支持库输出到 runtime_out 目录，仅在文件不存在时生成。
+
+    生成文件：DataStreamReader.cs / StblReader.cs / TableLoader.cs
+    模板路径：{template_dir}/csharp/runtime/{Name}.tmpl
+    """
+    _runtime_logger = logging.getLogger(__name__)
+    _RUNTIME_FILES = ["DataStreamReader", "StblReader", "TableLoader"]
+
+    os.makedirs(runtime_out, exist_ok=True)
+
+    for name in _RUNTIME_FILES:
+        dest_path = os.path.join(runtime_out, f"{name}.cs")
+        if os.path.exists(dest_path):
+            _runtime_logger.info("[Runtime] 跳过（已存在）: %s", dest_path)
+            continue
+
+        tmpl_path = os.path.join(template_dir, "csharp", "runtime", f"{name}.tmpl")
+        with open(tmpl_path, encoding="utf-8") as f:
+            content = f.read()
+
+        with open(dest_path, "w", encoding="utf-8", newline="\n") as f:
+            f.write(content)
+
+        _runtime_logger.info("[Runtime] 生成: %s", dest_path)

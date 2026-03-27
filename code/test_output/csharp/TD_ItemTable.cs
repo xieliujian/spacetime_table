@@ -54,5 +54,21 @@ namespace ST.Table
             m_DataDict.Clear();
             m_DataList.Clear();
         }
+
+        public void Load(string _dir, bool _useBin = true)
+        {
+            Clear();
+            if (_useBin)
+            {
+                byte[] bytes = TableLoader.LoadBytes(System.IO.Path.Combine(_dir, "item.bin"));
+                var stbl = new StblReader(bytes);
+                ParseFromBin(stbl.reader, stbl.rowCount);
+            }
+            else
+            {
+                string content = TableLoader.LoadText(System.IO.Path.Combine(_dir, "item.txt"));
+                ParseFromTxt(content);
+            }
+        }
     }
 }
