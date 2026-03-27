@@ -38,7 +38,7 @@ from writer.bin_writer import BinWriter
 from writer.txt_writer import TxtWriter
 from writer.lua_writer import LuaWriter
 from codegen.csharp_gen import CSharpGenerator, generate_runtime
-from codegen.golang_gen import GolangGenerator
+from codegen.golang_gen import GolangGenerator, generate_go_runtime
 
 logger = logging.getLogger("tableconv")
 
@@ -156,6 +156,8 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--go-out", default="", help="Go 代码输出目录（code 模式）")
     p.add_argument("--runtime-out", default="",
                    help="C# 运行时库输出目录（首次生成 DataStreamReader / StblReader / TableLoader）")
+    p.add_argument("--go-runtime-out", default="",
+                   help="Go 运行时库输出目录（首次生成 data_stream_reader / stbl_reader / table_loader）")
     p.add_argument("--tmpl", default="", help="模板目录（默认脚本同级 templates/）")
     p.add_argument("-v", "--verbose", action="store_true", help="输出详细日志")
     return p
@@ -176,8 +178,12 @@ def _validate_args(args) -> bool:
     # code 模式校验
     if args.format == "code":
         has_code_out = bool(args.csharp_out or args.go_out)
-        if not args.runtime_out and not has_code_out:
-            logger.error("代码生成模式（-f code）至少需要指定 --csharp-out、--go-out 或 --runtime-out 之一")
+        has_runtime_out = bool(args.runtime_out or args.go_runtime_out)
+        if not has_runtime_out and not has_code_out:
+            logger.error(
+                "代码生成模式（-f code）至少需要指定 --csharp-out、--go-out、"
+                "--runtime-out 或 --go-runtime-out 之一"
+            )
             return False
         if has_code_out and not args.input:
             logger.error("生成表格代码需要指定输入目录（-i）")
@@ -215,6 +221,8 @@ def main() -> int:
     # 运行时库生成（不依赖 xlsx 文件，提前执行）
     if args.format == "code" and args.runtime_out:
         generate_runtime(args.runtime_out, tmpl_dir)
+    if args.format == "code" and args.go_runtime_out:
+        generate_go_runtime(args.go_runtime_out, tmpl_dir)
 
     # runtime-only 模式（仅生成运行时库，无需 xlsx 输入）
     if args.format == "code" and not args.csharp_out and not args.go_out:

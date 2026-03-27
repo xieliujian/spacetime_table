@@ -95,12 +95,13 @@ class GolangGenerator(ICodeGenerator):
     # ------------------------------------------------------------------
 
     def _build_imports(self, needs_strconv: bool) -> str:
-        """根据字段类型构建 Go import 语句。"""
-        imports = ['"strings"']
+        """根据字段类型构建 Go import 语句。
+
+        "path/filepath" 始终包含（Load 方法需要），"strings" 始终包含（ParseFromTxt 需要）。
+        """
+        imports = ['"path/filepath"', '"strings"']
         if needs_strconv:
             imports.append('"strconv"')
-        if len(imports) == 1:
-            return f"import {imports[0]}"
         lines = ["import ("]
         for imp in sorted(imports):
             lines.append(f"\t{imp}")
@@ -184,3 +185,36 @@ class GolangGenerator(ICodeGenerator):
                 f"data.{field_name} = ParseVector3(fields[{index}])",
             ]
         return [f"data.{field_name} = fields[{index}]"]
+
+
+# ---------------------------------------------------------------------------
+# Go 运行时支持库生成（module 级函数，与 csharp_gen.generate_runtime 对称）
+# ---------------------------------------------------------------------------
+
+_GO_RUNTIME_FILES = ["data_stream_reader", "stbl_reader", "table_loader"]
+
+_go_runtime_logger = logging.getLogger(__name__)
+
+
+def generate_go_runtime(runtime_out: str, template_dir: str) -> None:
+    """将 Go 运行时支持库输出到 runtime_out 目录，逐文件检查，仅在文件不存在时生成。
+
+    生成文件：data_stream_reader.go / stbl_reader.go / table_loader.go
+    模板路径：{template_dir}/golang/runtime/{name}.tmpl
+    """
+    os.makedirs(runtime_out, exist_ok=True)
+
+    for name in _GO_RUNTIME_FILES:
+        dest_path = os.path.join(runtime_out, f"{name}.go")
+        if os.path.exists(dest_path):
+            _go_runtime_logger.info("[GoRuntime] 跳过（已存在）: %s", dest_path)
+            continue
+
+        tmpl_path = os.path.join(template_dir, "golang", "runtime", f"{name}.tmpl")
+        with open(tmpl_path, encoding="utf-8") as f:
+            content = f.read()
+
+        with open(dest_path, "w", encoding="utf-8", newline="\n") as f:
+            f.write(content)
+
+        _go_runtime_logger.info("[GoRuntime] 生成: %s", dest_path)

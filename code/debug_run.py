@@ -22,7 +22,7 @@ INPUT_DIR   = os.path.join(_SCRIPT_DIR, "test_data")
 OUTPUT_ROOT = os.path.join(_SCRIPT_DIR, "test_output")
 
 # 可选: "txt", "bin", "lua", "code"
-TEST_MODE = "txt"
+TEST_MODE = "code"
 
 # 导出目标: "client", "server", "all"
 TARGET = "client"
@@ -31,8 +31,11 @@ TARGET = "client"
 CSHARP_OUT = os.path.join(OUTPUT_ROOT, "csharp")
 GO_OUT     = os.path.join(OUTPUT_ROOT, "golang")
 
-# 运行时库输出目录（生成在 code/runtime，和 main.py 同级）
+# C# 运行时库输出目录（生成在 code/runtime，和 main.py 同级）
 RUNTIME_OUT = os.path.join(_SCRIPT_DIR, "runtime")
+
+# Go 运行时库输出目录（与 C# runtime 同目录）
+GO_RUNTIME_OUT = os.path.join(_SCRIPT_DIR, "runtime")
 
 # =============================================================
 
@@ -52,6 +55,7 @@ def run():
             "--csharp-out", CSHARP_OUT,
             "--go-out", GO_OUT,
             "--runtime-out", RUNTIME_OUT,
+            "--go-runtime-out", GO_RUNTIME_OUT,
             "-v",
         ]
     else:

@@ -3,6 +3,7 @@
 package table
 
 import (
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -58,6 +59,28 @@ func (t *SkillTable) ParseFromBin(reader *DataStreamReader, rowCount int) {
 		t.dataList = append(t.dataList, data)
 		t.dataDict[data.Id] = data
 	}
+}
+
+// Load 从目录加载全部数据，useBin=true 读 bin 格式，否则读 txt 格式
+func (t *SkillTable) Load(dir string, useBin bool) error {
+	if useBin {
+		data, err := LoadBytes(filepath.Join(dir, "skill.bin"))
+		if err != nil {
+			return err
+		}
+		stbl, err := NewStblReader(data)
+		if err != nil {
+			return err
+		}
+		t.ParseFromBin(stbl.Reader, stbl.RowCount)
+	} else {
+		content, err := LoadText(filepath.Join(dir, "skill.txt"))
+		if err != nil {
+			return err
+		}
+		t.ParseFromTxt(content)
+	}
+	return nil
 }
 
 // ParseFromTxt 从文本内容读取全部数据
