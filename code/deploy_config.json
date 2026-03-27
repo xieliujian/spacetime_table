@@ -1,0 +1,11 @@
+{
+    "deploy": [
+        { "name": "客户端C#代码",   "src": "./output/csharp",      "dest": "../../project/Assets/Script/Table",     "pattern": "*.cs"  },
+        { "name": "客户端Lua数据",  "src": "./output/lua",         "dest": "../../project/Assets/Script/Lua/table", "pattern": "*.lua" },
+        { "name": "客户端Bin数据",  "src": "./output/bin",         "dest": "../../project/BuildRes/config",          "pattern": "*.bin" },
+        { "name": "客户端Txt数据",  "src": "./output/txt",         "dest": "../../project/BuildRes/config",          "pattern": "*.txt" },
+        { "name": "服务器Go代码",   "src": "./output/golang",      "dest": "../../server/table",                     "pattern": "*.go"  },
+        { "name": "服务器Bin数据",  "src": "./output/server_bin",  "dest": "../../server/config",                    "pattern": "*.bin" },
+        { "name": "服务器Txt数据",  "src": "./output/server_txt",  "dest": "../../server/config",                    "pattern": "*.txt" }
+    ]
+}

@@ -182,14 +182,77 @@ return data
 | `ignore_output_code` | 跳过代码生成的表名列表 |
 | `need_lua_file` | Lua 导出白名单（空 = 全部导出） |
 
+## 文件部署
+
+生成完成后，使用 `deploy.py` 将输出文件复制（或移动）到项目目标目录：
+
+```bash
+cd code
+
+# 复制模式（默认），将所有输出部署到目标目录
+python deploy.py
+
+# 移动模式（源文件删除）
+python deploy.py --move
+
+# 只执行指定规则
+python deploy.py --only "客户端C#代码"
+
+# 查看所有部署规则
+python deploy.py --list
+
+# 使用自定义配置
+python deploy.py -c my_deploy.json
+
+# 详细日志
+python deploy.py -v
+```
+
+### 部署配置
+
+`deploy_config.json` 定义部署规则：
+
+```json
+{
+    "deploy": [
+        { "name": "客户端C#代码",   "src": "./output/csharp",      "dest": "../../project/Assets/Script/Table",     "pattern": "*.cs"  },
+        { "name": "客户端Lua数据",  "src": "./output/lua",         "dest": "../../project/Assets/Script/Lua/table", "pattern": "*.lua" },
+        { "name": "客户端Bin数据",  "src": "./output/bin",         "dest": "../../project/BuildRes/config",          "pattern": "*.bin" },
+        { "name": "客户端Txt数据",  "src": "./output/txt",         "dest": "../../project/BuildRes/config",          "pattern": "*.txt" },
+        { "name": "服务器Go代码",   "src": "./output/golang",      "dest": "../../server/table",                     "pattern": "*.go"  },
+        { "name": "服务器Bin数据",  "src": "./output/server_bin",  "dest": "../../server/config",                    "pattern": "*.bin" },
+        { "name": "服务器Txt数据",  "src": "./output/server_txt",  "dest": "../../server/config",                    "pattern": "*.txt" }
+    ]
+}
+```
+
+| 字段 | 说明 |
+|------|------|
+| `name` | 规则名称（用于日志和 `--only` 过滤） |
+| `src` | 源目录（支持相对路径，相对于配置文件） |
+| `dest` | 目标目录（支持相对路径，不存在时自动创建） |
+| `pattern` | 文件匹配模式（glob 语法） |
+
+### deploy.py 命令行参数
+
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| `-c, --config` | 部署配置 JSON 路径 | `deploy_config.json` |
+| `--move` | 移动模式（源文件删除） | 关闭（复制模式） |
+| `--only` | 只执行名称包含该字符串的规则 | 全部执行 |
+| `--list` | 列出所有规则，不执行 | — |
+| `-v, --verbose` | 输出详细日志 | 关闭 |
+
 ## 项目结构
 
 ```
 code/
 ├── main.py                  # CLI 入口
+├── deploy.py                # 文件部署工具
 ├── debug_run.py             # 调试入口（预配置参数）
 ├── config.py                # 配置加载
 ├── config.json              # 默认配置
+├── deploy_config.json       # 部署配置
 ├── requirements.txt         # Python 依赖
 ├── table_parser/
 │   ├── types.py             # 核心数据模型
