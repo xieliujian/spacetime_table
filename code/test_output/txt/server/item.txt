@@ -1,0 +1,6 @@
+﻿物品ID	物品名称	可堆叠
+int	string	bool
+Id	Name	Stackable
+2001	sword	0
+2002	potion	1
+2003	shield	0

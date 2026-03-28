@@ -433,14 +433,19 @@ python main.py -i <输入路径> -o <输出目录> -f <格式> [-t <目标>] [-c
 
 ### 7.2 使用示例
 
+**注意**：数据文件（bin/txt/lua）会自动按目标分离到子目录：
+- `-t client` → `output/bin/client/`
+- `-t server` → `output/bin/server/`
+- `-t all` → `output/bin/all/`
+
 ```bash
-# 导出客户端二进制数据
+# 导出客户端二进制数据（输出到 ./output/bin/client/）
 python main.py -i ./xlsx -o ./output/bin -f bin -t client
 
-# 导出服务器文本数据
+# 导出服务器文本数据（输出到 ./output/txt/server/）
 python main.py -i ./xlsx -o ./output/txt -f txt -t server
 
-# 导出客户端 Lua
+# 导出客户端 Lua（输出到 ./output/lua/client/）
 python main.py -i ./xlsx -o ./output/lua -f lua -t client
 
 # 生成 C# + Go 代码

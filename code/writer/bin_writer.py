@@ -51,8 +51,7 @@ class BinWriter(IWriter):
             b"\x00" * 10,
         )
 
-        os.makedirs(output_dir, exist_ok=True)
-        out_path = os.path.join(output_dir, f"{schema.file_name}.bin")
+        out_path = self._get_output_path(output_dir, target, schema.file_name, "bin")
 
         with open(out_path, "wb") as fp:
             fp.write(header)

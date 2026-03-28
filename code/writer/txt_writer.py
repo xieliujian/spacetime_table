@@ -26,8 +26,7 @@ class TxtWriter(IWriter):
             )
             return
 
-        os.makedirs(output_dir, exist_ok=True)
-        out_path = os.path.join(output_dir, f"{schema.file_name}.txt")
+        out_path = self._get_output_path(output_dir, target, schema.file_name, "txt")
 
         def _line(cells: list[str]) -> bytes:
             return "\t".join(cells).encode("utf-8") + _CRLF

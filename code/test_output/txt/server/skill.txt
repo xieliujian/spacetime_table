@@ -1,0 +1,8 @@
+﻿技能ID	技能名称	冷却时间	描述	服务器标记
+int	string	float	string	int
+Id	Name	Cooldown	Desc	ServerFlag
+1001	fireball	3	火球术	10
+1002	ice_arrow	2.5	冰箭术	20
+1003	thunder	5	雷击	30
+1004	heal	4	治疗术	0
+1005	slash	1.5	斩击	15

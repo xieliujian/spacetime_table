@@ -174,8 +174,7 @@ class LuaWriter(IWriter):
         lines.append("return data")
 
         text = "\n".join(lines) + "\n"
-        os.makedirs(output_dir, exist_ok=True)
-        out_path = os.path.join(output_dir, f"{schema.file_name}.lua")
+        out_path = self._get_output_path(output_dir, target, schema.file_name, "lua")
         with open(out_path, "w", encoding="utf-8", newline="\n") as fp:
             fp.write(text)
 
