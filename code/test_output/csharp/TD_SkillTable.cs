@@ -12,6 +12,20 @@ namespace ST.Table
     /// </summary>
     public partial class TD_SkillTable
     {
+        static TD_SkillTable s_Instance;
+        public static TD_SkillTable S
+        {
+            get
+            {
+                if (s_Instance == null)
+                {
+                    s_Instance = new TD_SkillTable();
+                }
+
+                return s_Instance;
+            }
+        }
+
         Dictionary<int, TD_Skill> m_DataDict = new();
         List<TD_Skill> m_DataList = new();
 

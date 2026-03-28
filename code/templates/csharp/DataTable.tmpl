@@ -12,6 +12,20 @@ namespace ST.Table
     /// </summary>
     public partial class TD_${CLASS_NAME}Table
     {
+        static TD_${CLASS_NAME}Table s_Instance;
+        public static TD_${CLASS_NAME}Table S
+        {
+            get
+            {
+                if (s_Instance == null)
+                {
+                    s_Instance = new TD_${CLASS_NAME}Table();
+                }
+
+                return s_Instance;
+            }
+        }
+
         Dictionary<${KEY_TYPE}, TD_${CLASS_NAME}> m_DataDict = new();
         List<TD_${CLASS_NAME}> m_DataList = new();
 
