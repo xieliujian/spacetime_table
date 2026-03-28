@@ -46,27 +46,35 @@ python main.py -i <xlsx目录> -o <输出目录> -f lua -t client
 # 导出服务器文本数据
 python main.py -i <xlsx目录> -o <输出目录> -f txt -t server
 
-# 生成 C# 代码
+# 生成 C# 表格代码
 python main.py -i <xlsx目录> -f code --csharp-out <C#输出目录>
 
-# 生成 Go 代码
+# 生成 C# 运行时库（DataStreamReader / StblReader / TableLoader）
+python main.py -f code --runtime-out <运行时目录>
+
+# 生成 Go 表格代码
 python main.py -i <xlsx目录> -f code --go-out <Go输出目录>
 
-# 同时生成 C# + Go 代码
-python main.py -i <xlsx目录> -f code --csharp-out <C#目录> --go-out <Go目录>
+# 生成 Go 运行时库（data_stream_reader / stbl_reader / table_loader）
+python main.py -f code --go-runtime-out <Go运行时目录>
+
+# 同时生成 C# + Go 代码和运行时库
+python main.py -i <xlsx目录> -f code --csharp-out <C#目录> --go-out <Go目录> --runtime-out <C#运行时目录> --go-runtime-out <Go运行时目录>
 ```
 
 ### 命令行参数
 
 | 参数 | 说明 | 默认值 |
 |------|------|--------|
-| `-i, --input` | 输入目录或单个 xlsx 文件 | 必填 |
+| `-i, --input` | 输入目录或单个 xlsx 文件 | 必填（数据/代码模式） |
 | `-o, --output` | 数据输出目录 | 数据模式必填 |
 | `-f, --format` | 输出格式：`bin` / `txt` / `lua` / `code` | 必填 |
 | `-t, --target` | 导出目标：`client` / `server` / `all` | `client` |
 | `-c, --config` | 配置 JSON 路径 | `config.json` |
-| `--csharp-out` | C# 代码输出目录 | code 模式可选 |
-| `--go-out` | Go 代码输出目录 | code 模式可选 |
+| `--csharp-out` | C# 表格代码输出目录 | code 模式可选 |
+| `--go-out` | Go 表格代码输出目录 | code 模式可选 |
+| `--runtime-out` | C# 运行时库输出目录 | code 模式可选 |
+| `--go-runtime-out` | Go 运行时库输出目录 | code 模式可选 |
 | `--tmpl` | 模板目录 | 脚本同级 `templates/` |
 | `-v, --verbose` | 输出详细日志 | 关闭 |
 
@@ -127,6 +135,28 @@ _skill.xlsx       ❌ (下划线开头)
 
 ## 输出格式
 
+### 输出目录结构
+
+数据文件（bin/txt/lua）按导出目标自动分离到子目录：
+
+```
+output/
+├── bin/
+│   ├── client/    # -t client 输出
+│   ├── server/    # -t server 输出
+│   └── all/       # -t all 输出
+├── txt/
+│   ├── client/
+│   ├── server/
+│   └── all/
+└── lua/
+    ├── client/
+    ├── server/
+    └── all/
+```
+
+这确保 C# 代码（客户端字段）读取 client 数据，Go 代码（服务器字段）读取 server 数据。
+
 ### TXT（文本）
 
 - 编码：UTF-8 BOM
@@ -158,11 +188,55 @@ return data
 - `TD_{ClassName}.cs` — 数据行类（字段、属性、`ParseFromBin`、`ParseFromTxt`）
 - `TD_{ClassName}Table.cs` — 表管理器（字典索引、批量加载、`GetById`）
 
+命名规范：
+- 类名前缀：`TD_` + PascalCase（如 `TD_Skill`、`TD_SkillTable`）
+- 私有字段：`m_` 前缀（如 `m_Id`、`m_Name`）
+- 公开属性：camelCase（如 `public int id => m_Id;`）
+- 所有生成的类使用 `partial class`
+
+#### C# 运行时库
+
+运行时支持库（命名空间 `ST.Core.Table`），首次生成后不覆盖：
+
+| 文件 | 类 | 说明 |
+|------|-----|------|
+| `DataStreamReader.cs` | `DataStreamReader` | 二进制字节流读取，varint/zigzag，支持 Vector2/Vector3 |
+| `StblReader.cs` | `StblReader` | STBL 文件头解析，属性：`rowCount`、`reader` |
+| `TableLoader.cs` | `TableLoader` | 静态文件 IO：`LoadBytes(path)`、`LoadText(path)` |
+
+生成命令：
+```bash
+# 生成运行时库
+python main.py -f code --runtime-out <运行时目录>
+
+# 同时生成表格代码和运行时库
+python main.py -i <xlsx目录> -f code --csharp-out <表格目录> --runtime-out <运行时目录>
+```
+
 ### Go 代码
 
 每张表生成 1 个文件，包名 `table`：
 
 - `{file_name}_table.go` — 数据结构 + 表管理器（`ParseFromBin`、`ParseFromTxt`、`GetById`）
+
+#### Go 运行时库
+
+运行时支持库（包名 `table`），首次生成后不覆盖：
+
+| 文件 | 类型/函数 | 说明 |
+|------|----------|------|
+| `data_stream_reader.go` | `DataStreamReader` | 二进制字节流读取，varint/zigzag，支持 Vector2/Vector3 |
+| `stbl_reader.go` | `StblReader` | STBL 文件头解析，字段：`RowCount`、`Reader` |
+| `table_loader.go` | `LoadBytes`、`LoadText` | 文件 IO 函数 |
+
+生成命令：
+```bash
+# 生成运行时库
+python main.py -f code --go-runtime-out <Go运行时目录>
+
+# 同时生成表格代码和运行时库
+python main.py -i <xlsx目录> -f code --go-out <表格目录> --go-runtime-out <运行时目录>
+```
 
 ## 配置文件
 
